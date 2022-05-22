@@ -2,6 +2,9 @@ package LRUCache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+
+import LRUCache.LRUCacheDesign.LRUCache.Entry;
 
 public class LRUCacheDesign {
 	
@@ -22,19 +25,24 @@ public class LRUCacheDesign {
 	}
 	public static class LRUCache{
 		
+	
+
+
 		@Override
 		public String toString() {
-			return "LRUCache [maxCacheSize=" + maxCacheSize + ", list=" + list + ", map=" + map + "]";
+			return "LRUCache [maxCacheSize=" + maxCacheSize + ", currentSize=" + currentSize + ", list=" + list
+					+ ", map=" + map + "]";
 		}
 
 
 		private int maxCacheSize;
-		private ArrayList<Entry> list;
-		private HashMap<Integer,Entry> map = new HashMap<Integer,Entry>();
+		int currentSize = 0;
+		private DoublyLinkedList list;
+		private HashMap<Integer,Node> map = new HashMap<Integer,Node>();
 
 		public LRUCache(int size){
 			this.maxCacheSize = size;
-			list = new ArrayList<Entry>(size);
+			list = new DoublyLinkedList();
 		}
 		
 		
@@ -42,41 +50,55 @@ public class LRUCacheDesign {
 		
 			if(map.containsKey(key)) {
 				
-				Entry foundEntry = map.get(key);
+				Node foundNode = map.get(key);
 				
-				if(list.size() == maxCacheSize) {
-					Entry lruEntry = list.get(maxCacheSize - 1);
-					list.remove(lruEntry);
-					map.remove(lruEntry.key);
-					list.add(0, foundEntry);	
+				if(currentSize == maxCacheSize) {
+					removeLeastRecentlyUsedEntry(list);
+					
 				}
-				else {
-					list.remove(foundEntry);
-					list.add(0, foundEntry);	
-				}
+				foundNode.entry.value = value;
+				updateEntryInMapAndMoveToFrontInList(foundNode);
+				
 			}
 			else {
 				
-				if(list.size() == maxCacheSize) {
-					Entry lruEntry = list.get(maxCacheSize - 1);
-					list.remove(lruEntry);
-					map.remove(lruEntry.key);		
+				if(currentSize == maxCacheSize) {
+					removeLeastRecentlyUsedEntry(list);	
+				}
+				else {
+					currentSize++;
 				}
 				Entry newEntry = new Entry(key,value);
-				list.add(0, newEntry);
-				map.put(key, newEntry);	
+				Node newNode = new Node(newEntry,null, null);
+				list.addNodeAtFront(newNode);
+				map.put(newNode.entry.key, newNode);	
+				
+				
 			}
 			
 			
 		}
 	
 		
+		private void updateEntryInMapAndMoveToFrontInList(Node node) {
+			list.remove(node);
+			list.addNodeAtFront(node);
+			map.put(node.entry.key, node);			
+		}
+
+
+		private void removeLeastRecentlyUsedEntry(DoublyLinkedList list) {
+			Node lruNode = list.removeLastNode();
+			map.remove(lruNode.entry.key);			
+		}
+
+
 		int get(int key) {
 			if(map.containsKey(key)) {
-				Entry existingEntry = map.get(key);
-				list.remove(existingEntry);
-				list.add(0, existingEntry);
-				return existingEntry.value;
+				Node existingNode = map.get(key);
+				list.remove(existingNode);
+				list.addNodeAtFront(existingNode);
+				return existingNode.entry.value;
 			}
 			return -1;
 		}
@@ -96,4 +118,72 @@ public class LRUCacheDesign {
 		}
 	}
 
+}
+
+class Node{
+	Node next;
+	Node prev;
+	Entry entry;
+	
+	Node(Entry entry, Node next, Node prev){
+		this.entry = entry;
+		this.next = next;
+		this.prev = prev;
+	}
+
+	@Override
+	public String toString() {
+		return "Node [entry=" + entry + "]";
+	}
+	
+	
+}
+
+class DoublyLinkedList{
+	Node head;
+	Node tail;
+	public DoublyLinkedList(){
+		head = new Node(null,null,null);
+	 	tail = new Node(null,null,null);
+		head.next = tail;
+		tail.prev = head;
+	}
+	
+
+	void addNodeAtFront(Node newNode) {
+		Node firstNode = head.next;
+		firstNode.prev = newNode;
+		newNode.next = firstNode;
+		newNode.prev = head;
+		head.next = newNode;
+	}
+	
+	void remove(Node node) {
+		node.prev.next = node.next;
+		node.next.prev = node.prev;
+	}
+	
+	Node removeLastNode() {
+		Node lastNode = tail.prev;
+		remove(lastNode);
+		return lastNode;
+	}
+
+
+	@Override
+	public String toString() {
+		String nodes = "";
+		Node temp = head.next;
+		while(temp!= null) {
+			if(temp.entry != null) {
+				nodes += temp.entry.toString();
+			}
+			temp= temp.next;
+		}
+		return nodes;
+	}
+	
+	
+	
+	
 }
