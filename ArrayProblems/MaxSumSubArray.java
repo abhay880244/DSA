@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class MaxSumSubArray {
 	public static void main(String[] args) {
-		int a[] = {-3};
+		int a[] = {-3, -6,-2,-8};
 		
 		int currentSum = 0;
 		int maxSum = Integer.MIN_VALUE;

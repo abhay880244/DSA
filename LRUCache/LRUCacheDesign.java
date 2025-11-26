@@ -51,14 +51,9 @@ public class LRUCacheDesign {
 			if(map.containsKey(key)) {
 				
 				Node foundNode = map.get(key);
-				
-				if(currentSize == maxCacheSize) {
-					removeLeastRecentlyUsedEntry(list);
-					
-				}
 				foundNode.entry.value = value;
-				updateEntryInMapAndMoveToFrontInList(foundNode);
-				
+				list.remove(foundNode);
+				list.addNodeAtFront(foundNode);
 			}
 			else {
 				
@@ -78,14 +73,6 @@ public class LRUCacheDesign {
 			
 			
 		}
-	
-		
-		private void updateEntryInMapAndMoveToFrontInList(Node node) {
-			list.remove(node);
-			list.addNodeAtFront(node);
-			map.put(node.entry.key, node);			
-		}
-
 
 		private void removeLeastRecentlyUsedEntry(DoublyLinkedList list) {
 			Node lruNode = list.removeLastNode();

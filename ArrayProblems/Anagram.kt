@@ -2,7 +2,7 @@ package ArrayProblems
 
 
 fun main() {
-    println(isAnagram("a","a"))
+    println(isAnagram("attyy","aytyt"))
 }
 
 fun isAnagram(s1: String, s2: String): Boolean {
